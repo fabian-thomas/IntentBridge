@@ -1,0 +1,32 @@
+# direnv
+.direnv
+
+# Nix build outputs
+result
+
+# Gradle
+.gradle/
+build/
+**/build/
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+
+# Android NDK / CMake
+.cxx/
+.externalNativeBuild/
+
+# Keystores
+*.jks
+*.keystore
+
+# OS cruft
+.DS_Store
+.Spotlight-V100
+Thumbs.db
+
+# Editors
+.vscode/
