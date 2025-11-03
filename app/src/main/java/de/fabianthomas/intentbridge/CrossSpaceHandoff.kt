@@ -50,6 +50,11 @@ object CrossSpaceHandoff {
         }.start()
     }
 
+    fun sendShare(context: Context, payload: JSONObject): Boolean {
+        runCatching { TlsIdentityStore.ensureIdentity(context) }
+        return sendPayload(context, payload, "share")
+    }
+
     private fun sendPayload(context: Context, payload: JSONObject, detail: String): Boolean {
         val role = ProfileRoleStore.getRole(context)
         val targetPort = ProfileRoleStore.targetPort(role)

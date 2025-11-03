@@ -172,6 +172,36 @@ class SocketServerService : Service() {
         NotificationManagerCompat.from(this).notify(HANDOFF_NOTIFICATION_ID, notification)
     }
 
+    private fun showShareNotification(shareId: String, summary: String?) {
+        val sourceRole = ProfileRoleStore.opposite(ProfileRoleStore.getRole(applicationContext))
+        val sourceName = ProfileRoleStore.describe(sourceRole)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            SHARE_REQUEST_CODE_BASE + (shareId.hashCode() and 0x7FFFFFFF),
+            ShareForwardActivity.createIntent(this, shareId),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(this, HANDOFF_CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(getString(R.string.notification_share_title, sourceName))
+            .setContentText(summary ?: getString(R.string.notification_share_text_placeholder))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+            .setAutoCancel(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(pendingIntent)
+
+        summary?.let {
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
+        }
+
+        NotificationManagerCompat.from(this).notify(
+            SHARE_NOTIFICATION_ID_BASE + (shareId.hashCode() and 0x0FFFFFFF),
+            builder.build()
+        )
+    }
+
     private fun runServer() {
         val role = ProfileRoleStore.getRole(applicationContext)
         val listenPort = ProfileRoleStore.listeningPort(role)
@@ -236,6 +266,9 @@ class SocketServerService : Service() {
                         Log.w(TAG, "Received handoff payload without URI")
                     }
                 }
+                "share" -> {
+                    handleSharePayload(payload)
+                }
                 "routing_pref" -> {
                     val category = payload.optString("category").takeIf { it.isNotEmpty() }
                     val roleName = payload.optString("role").takeIf { it.isNotEmpty() }
@@ -259,6 +292,26 @@ class SocketServerService : Service() {
         Log.i(TAG, "Received handoff URL: $url")
         val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return
         showHandoffNotification(uri)
+    }
+
+    private fun handleSharePayload(payload: JSONObject) {
+        val stored = ShareStorage.persist(applicationContext, payload)
+        if (stored == null) {
+            Log.w(TAG, "Failed to persist incoming share payload")
+            return
+        }
+        val summary = shareSummary(stored)
+        Log.i(TAG, "Received share payload ${stored.id} (summary=$summary)")
+        showShareNotification(stored.id, summary)
+    }
+
+    private fun shareSummary(stored: ShareStorage.StoredShare): String? {
+        stored.subject?.takeIf { it.isNotBlank() }?.let { return it }
+        stored.text?.trim()?.takeIf { it.isNotEmpty() }?.let { text ->
+            return text.take(MAX_NOTIFICATION_TEXT)
+        }
+        stored.items.firstOrNull()?.displayName?.takeIf { !it.isNullOrBlank() }?.let { return it }
+        return null
     }
 
     private fun sendSecureMessage(channelId: Int, socket: Socket, payload: JSONObject) {
@@ -301,6 +354,9 @@ class SocketServerService : Service() {
         private const val HANDOFF_NOTIFICATION_ID = 2001
         private const val HANDOFF_CHANNEL_ID = "intentbridge_handoff_channel"
         private const val HANDOFF_REQUEST_CODE = 201
+        private const val SHARE_NOTIFICATION_ID_BASE = 3000
+        private const val SHARE_REQUEST_CODE_BASE = 301
+        private const val MAX_NOTIFICATION_TEXT = 200
         private const val ACTION_STOP = "de.fabianthomas.intentbridge.action.STOP_SOCKET_SERVER"
         private val serviceRunning = AtomicBoolean(false)
 

@@ -1,6 +1,7 @@
 package de.fabianthomas.intentbridge
 
 import android.Manifest
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         setupLinkButton(R.id.linkButtonWebsite, "https://www.wikipedia.org/")
         setupLinkButton(R.id.linkButtonMail, "mailto:example@example.com?subject=Hello&body=Hi%20there!")
         setupLinkButton(R.id.linkButtonTel, "tel:+15551234567")
+        setupShareTestButton()
 
         setupRoutingToggles()
 
@@ -286,6 +288,37 @@ class MainActivity : AppCompatActivity() {
             }
             runCatching { startActivity(linkIntent) }.onFailure {
                 Toast.makeText(this, getString(R.string.error_open_link, url), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun setupShareTestButton() {
+        val button = findViewById<Button>(R.id.linkButtonShareTest)
+        button.setOnClickListener {
+            val roleLabel = ProfileRoleStore.describe(ProfileRoleStore.getRole(this))
+            val timestamp = System.currentTimeMillis()
+            val fileName = "intentbridge-share-test-$timestamp.txt"
+            val fileContents = getString(R.string.share_test_file_contents, roleLabel)
+            val fileUri = ShareStorage.createSampleTextFile(this, fileName, fileContents)
+            if (fileUri == null) {
+                Toast.makeText(this, R.string.share_test_failure, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_test_subject))
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_test_inline_text))
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+                putExtra(Intent.EXTRA_TITLE, fileName)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData = ClipData.newUri(contentResolver, fileName, fileUri)
+            }
+
+            runCatching {
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.share_test_chooser)))
+            }.onFailure {
+                Toast.makeText(this, R.string.share_test_failure, Toast.LENGTH_SHORT).show()
             }
         }
     }

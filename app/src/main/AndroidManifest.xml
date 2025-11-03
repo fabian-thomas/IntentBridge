@@ -133,6 +133,30 @@
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true" />
 
+        <activity
+            android:name=".ShareBridgeActivity"
+            android:exported="true"
+            android:label="@string/share_activity_label"
+            android:theme="@style/Theme.IntentBridge.TranslucentOverlay">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ShareForwardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.IntentBridge.TranslucentOverlay"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
+
         <receiver
             android:name=".BootReceiver"
             android:exported="false"
@@ -149,6 +173,16 @@
             android:name=".SocketServerService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

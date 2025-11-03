@@ -14,7 +14,7 @@ See the [Screenshots](#screenshots) below for a quick glimpse.
 
 ## Features
 
-* Relays Google Maps, YouTube, Mail, Phone, and general web links.
+* Relays Google Maps, YouTube, Mail, Phone, general web links, and share/save files between profiles.
 * Resolves Google short links in any profile.
 * Configurable per-link-type routing between profiles.
 * Minimal interaction — open via a single notification tap.

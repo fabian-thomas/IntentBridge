@@ -60,4 +60,20 @@
     <string name="tls_fingerprint_placeholder">—</string>
     <string name="tls_pin_reset_done">Pinned certificate cleared. The next connection will trust the presented certificate.</string>
     <string name="tls_regenerated">Certificate regenerated. Reset the pinned certificate in the other app.</string>
+    <string name="share_activity_label">IntentBridge Share</string>
+    <string name="share_sent_to">Sent share to %1$s. Tap the notification.</string>
+    <string name="share_failed">Couldn&#8217;t deliver the share to the other profile.</string>
+    <string name="share_unsupported">This share can&#8217;t be bridged yet.</string>
+    <string name="share_stream_error">Couldn&#8217;t read the shared attachment.</string>
+    <string name="share_too_large">Attachment is too large to bridge. Try a smaller file.</string>
+    <string name="share_missing">Share data is no longer available.</string>
+    <string name="share_chooser">Send with</string>
+    <string name="notification_share_title">Share from %1$s</string>
+    <string name="notification_share_text_placeholder">Tap to pick an app.</string>
+    <string name="link_button_share_test">Share test file</string>
+    <string name="share_test_subject">IntentBridge share test</string>
+    <string name="share_test_inline_text">IntentBridge sample share.</string>
+    <string name="share_test_file_contents">IntentBridge test file generated in %1$s.</string>
+    <string name="share_test_failure">Couldn&#8217;t start the share. Try again.</string>
+    <string name="share_test_chooser">Share test file via</string>
 </resources>
