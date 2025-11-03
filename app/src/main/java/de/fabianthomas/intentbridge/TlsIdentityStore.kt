@@ -125,6 +125,28 @@ object TlsIdentityStore {
     fun hasAuthError(context: Context): Boolean =
         preferences(context).getBoolean(KEY_AUTH_ERROR, false)
 
+    fun registerPeerUpdateListener(
+        context: Context,
+        onChange: () -> Unit
+    ): SharedPreferences.OnSharedPreferenceChangeListener {
+        val prefs = preferences(context)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == KEY_PEER_CERT || key == KEY_PEER_FINGERPRINT || key == KEY_AUTH_ERROR) {
+                onChange()
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        return listener
+    }
+
+    fun unregisterPeerUpdateListener(
+        context: Context,
+        listener: SharedPreferences.OnSharedPreferenceChangeListener?
+    ) {
+        if (listener == null) return
+        preferences(context).unregisterOnSharedPreferenceChangeListener(listener)
+    }
+
     private fun generateAndStoreIdentity(context: Context) {
         val keyPair = generateKeyPair()
         val roleName = ProfileRoleStore.describe(ProfileRoleStore.getRole(context))

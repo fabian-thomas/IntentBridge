@@ -6,13 +6,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import android.content.SharedPreferences
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var routingMailSwitch: MaterialSwitch
     private lateinit var routingTelSwitch: MaterialSwitch
     private var activeRole: ProfileRoleStore.Role = ProfileRoleStore.Role.PRIVATE_SPACE
+    private var tlsPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +54,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         runCatching { TlsIdentityStore.ensureIdentity(this) }
+        tlsPrefsListener = TlsIdentityStore.registerPeerUpdateListener(this) {
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread { refreshTlsSection() }
+            }
+        }
 
         statusSame = findViewById(R.id.statusSameProfile)
         statusOther = findViewById(R.id.statusOtherProfile)
@@ -324,6 +330,12 @@ class MainActivity : AppCompatActivity() {
             }
             tlsResetPinButton.isEnabled = true
         }
+    }
+
+    override fun onDestroy() {
+        TlsIdentityStore.unregisterPeerUpdateListener(this, tlsPrefsListener)
+        tlsPrefsListener = null
+        super.onDestroy()
     }
 
     private enum class StatusState {
