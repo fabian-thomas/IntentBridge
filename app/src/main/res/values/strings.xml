@@ -70,10 +70,9 @@
     <string name="share_chooser">Send with</string>
     <string name="notification_share_title">Share from %1$s</string>
     <string name="notification_share_text_placeholder">Tap to pick an app.</string>
-    <string name="link_button_share_test">Share test file</string>
-    <string name="share_test_subject">IntentBridge share test</string>
-    <string name="share_test_inline_text">IntentBridge sample share.</string>
-    <string name="share_test_file_contents">IntentBridge test file generated in %1$s.</string>
-    <string name="share_test_failure">Couldn&#8217;t start the share. Try again.</string>
-    <string name="share_test_chooser">Share test file via</string>
+    <string name="link_button_share_test">Legacy share file</string>
+    <string name="legacy_share_subject">IntentBridge legacy share test (%1$s)</string>
+    <string name="legacy_share_inline">Legacy-style share from IntentBridge in %1$s.</string>
+    <string name="legacy_share_file_contents">IntentBridge legacy share test file generated in %1$s.</string>
+    <string name="legacy_share_failure">Couldn&#8217;t open the legacy share dialog. Try again.</string>
 </resources>

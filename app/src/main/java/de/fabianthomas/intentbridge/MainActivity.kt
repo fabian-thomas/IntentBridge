@@ -1,7 +1,6 @@
 package de.fabianthomas.intentbridge
 
 import android.Manifest
-import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -297,29 +296,23 @@ class MainActivity : AppCompatActivity() {
         button.setOnClickListener {
             val roleLabel = ProfileRoleStore.describe(ProfileRoleStore.getRole(this))
             val timestamp = System.currentTimeMillis()
-            val fileName = "intentbridge-share-test-$timestamp.txt"
-            val fileContents = getString(R.string.share_test_file_contents, roleLabel)
+            val fileName = "intentbridge-legacy-share-$timestamp.txt"
+            val fileContents = getString(R.string.legacy_share_file_contents, roleLabel)
             val fileUri = ShareStorage.createSampleTextFile(this, fileName, fileContents)
             if (fileUri == null) {
-                Toast.makeText(this, R.string.share_test_failure, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.legacy_share_failure, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_test_subject))
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_test_inline_text))
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.legacy_share_subject, fileName))
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.legacy_share_inline, roleLabel))
                 putExtra(Intent.EXTRA_STREAM, fileUri)
-                putExtra(Intent.EXTRA_TITLE, fileName)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                clipData = ClipData.newUri(contentResolver, fileName, fileUri)
             }
 
-            runCatching {
-                startActivity(Intent.createChooser(shareIntent, getString(R.string.share_test_chooser)))
-            }.onFailure {
-                Toast.makeText(this, R.string.share_test_failure, Toast.LENGTH_SHORT).show()
-            }
+            runCatching { startActivity(shareIntent) }
+                .onFailure { Toast.makeText(this, R.string.legacy_share_failure, Toast.LENGTH_SHORT).show() }
         }
     }
 
