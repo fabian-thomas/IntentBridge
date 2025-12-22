@@ -44,6 +44,9 @@
     <string name="notification_socket_title">IntentBridge ready</string>
     <string name="notification_socket_description">%1$s listener on port %2$d</string>
     <string name="notification_action_stop">Stop listener</string>
+    <string name="notification_action_share">Share</string>
+    <string name="notification_action_copy">Copy</string>
+    <string name="clipboard_label_link">IntentBridge link</string>
     <string name="notification_permission_required">Allow notifications so the IntentBridge listener can stay running.</string>
     <string name="cross_space_sent_to">Sent to %1$s. Tap on the notification.</string>
     <string name="notification_handoff_channel_name">Link distributor</string>
