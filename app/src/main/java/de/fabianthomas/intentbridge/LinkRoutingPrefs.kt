@@ -14,6 +14,7 @@ object LinkRoutingPrefs {
         BROWSER("browser", R.string.routing_category_browser),
         MAPS("maps", R.string.routing_category_maps),
         YOUTUBE("youtube", R.string.routing_category_youtube),
+        SPOTIFY("spotify", R.string.routing_category_spotify),
         MAIL("mail", R.string.routing_category_mail),
         TEL("tel", R.string.routing_category_tel);
 
@@ -79,6 +80,7 @@ object LinkRoutingPrefs {
     private fun defaultRole(category: LinkCategory): ProfileRoleStore.Role = when (category) {
         LinkCategory.BROWSER -> ProfileRoleStore.Role.PERSONAL_SPACE
         LinkCategory.MAPS -> ProfileRoleStore.Role.PRIVATE_SPACE
+        LinkCategory.SPOTIFY -> ProfileRoleStore.Role.PRIVATE_SPACE
         LinkCategory.YOUTUBE -> ProfileRoleStore.Role.PERSONAL_SPACE
         LinkCategory.MAIL -> ProfileRoleStore.Role.PERSONAL_SPACE
         LinkCategory.TEL -> ProfileRoleStore.Role.PERSONAL_SPACE

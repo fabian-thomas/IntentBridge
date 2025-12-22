@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var routingBrowserSwitch: MaterialSwitch
     private lateinit var routingMapsSwitch: MaterialSwitch
     private lateinit var routingYoutubeSwitch: MaterialSwitch
+    private lateinit var routingSpotifySwitch: MaterialSwitch
     private lateinit var routingMailSwitch: MaterialSwitch
     private lateinit var routingTelSwitch: MaterialSwitch
     private var activeRole: ProfileRoleStore.Role = ProfileRoleStore.Role.PRIVATE_SPACE
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         routingBrowserSwitch = findViewById(R.id.routingBrowserSwitch)
         routingMapsSwitch = findViewById(R.id.routingMapsSwitch)
         routingYoutubeSwitch = findViewById(R.id.routingYoutubeSwitch)
+        routingSpotifySwitch = findViewById(R.id.routingSpotifySwitch)
         routingMailSwitch = findViewById(R.id.routingMailSwitch)
         routingTelSwitch = findViewById(R.id.routingTelSwitch)
 
@@ -114,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         setupLinkButton(R.id.linkButtonMapsShort, "https://maps.app.goo.gl/Lr4bVskgxWTkQanG6")
         setupLinkButton(R.id.linkButtonMapsFull, "https://www.google.com/maps/search/?api=1&query=lumen+field")
         setupLinkButton(R.id.linkButtonYouTube, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        setupLinkButton(R.id.linkButtonSpotify, "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
         setupLinkButton(R.id.linkButtonWebsite, "https://www.wikipedia.org/")
         setupLinkButton(R.id.linkButtonMail, "mailto:example@example.com?subject=Hello&body=Hi%20there!")
         setupLinkButton(R.id.linkButtonTel, "tel:+15551234567")
@@ -232,6 +235,9 @@ class MainActivity : AppCompatActivity() {
         routingYoutubeSwitch.setOnCheckedChangeListener { _, isChecked ->
             updateRoutingPreference(LinkRoutingPrefs.LinkCategory.YOUTUBE, isChecked)
         }
+        routingSpotifySwitch.setOnCheckedChangeListener { _, isChecked ->
+            updateRoutingPreference(LinkRoutingPrefs.LinkCategory.SPOTIFY, isChecked)
+        }
         routingMailSwitch.setOnCheckedChangeListener { _, isChecked ->
             updateRoutingPreference(LinkRoutingPrefs.LinkCategory.MAIL, isChecked)
         }
@@ -245,6 +251,7 @@ class MainActivity : AppCompatActivity() {
         updateSwitch(routingBrowserSwitch, LinkRoutingPrefs.LinkCategory.BROWSER, role)
         updateSwitch(routingMapsSwitch, LinkRoutingPrefs.LinkCategory.MAPS, role)
         updateSwitch(routingYoutubeSwitch, LinkRoutingPrefs.LinkCategory.YOUTUBE, role)
+        updateSwitch(routingSpotifySwitch, LinkRoutingPrefs.LinkCategory.SPOTIFY, role)
         updateSwitch(routingMailSwitch, LinkRoutingPrefs.LinkCategory.MAIL, role)
         updateSwitch(routingTelSwitch, LinkRoutingPrefs.LinkCategory.TEL, role)
     }

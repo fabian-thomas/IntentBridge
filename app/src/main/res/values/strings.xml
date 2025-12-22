@@ -19,11 +19,13 @@
     <string name="routing_browser_label">Open other web links in this space</string>
     <string name="routing_maps_label">Open Maps links in this space</string>
     <string name="routing_youtube_label">Open YouTube links in this space</string>
+    <string name="routing_spotify_label">Open Spotify links in this space</string>
     <string name="routing_mail_label">Open email links in this space</string>
     <string name="routing_tel_label">Open phone links in this space</string>
     <string name="routing_category_browser">Web</string>
     <string name="routing_category_maps">Maps</string>
     <string name="routing_category_youtube">YouTube</string>
+    <string name="routing_category_spotify">Spotify</string>
     <string name="routing_category_mail">Email</string>
     <string name="routing_category_tel">Phone</string>
     <string name="routing_updated_toast">Now opening %1$s links in %2$s.</string>

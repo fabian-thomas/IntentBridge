@@ -84,6 +84,11 @@ object LinkRouter {
             return
         }
 
+        if (isSpotify(uri)) {
+            handleSpotify(activity, uri)
+            return
+        }
+
         if (isMaps(uri)) {
             handleMaps(activity, uri)
             return
@@ -131,6 +136,12 @@ object LinkRouter {
         }
     }
 
+    private fun handleSpotify(activity: ComponentActivity, uri: Uri) {
+        routeCategory(activity, LinkRoutingPrefs.LinkCategory.SPOTIFY, uri) {
+            activity.launchRoutedViewIntent(uri)
+        }
+    }
+
     private fun handleGeneric(activity: ComponentActivity, uri: Uri) {
         routeCategory(activity, LinkRoutingPrefs.LinkCategory.BROWSER, uri) {
             activity.launchRoutedViewIntent(uri)
@@ -172,6 +183,14 @@ object LinkRouter {
             host == "youtube.com" ||
             host == "m.youtube.com" ||
             host == "music.youtube.com"
+    }
+
+    private fun isSpotify(uri: Uri): Boolean {
+        if (uri.scheme != "https") return false
+        val host = uri.host?.lowercase(Locale.ROOT) ?: return false
+        if (host == "open.spotify.com" || host == "spotify.link") return true
+        if (host.endsWith(".spotify.com")) return true
+        return false
     }
 
     private fun isMaps(uri: Uri): Boolean {

@@ -252,6 +252,13 @@
                         android:text="@string/routing_youtube_label" />
 
                     <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/routingSpotifySwitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/routing_spotify_label" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/routingMailSwitch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -311,6 +318,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        android:textAllCaps="false" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/linkButtonSpotify"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8"
                         android:textAllCaps="false" />
 
                     <com.google.android.material.button.MaterialButton
