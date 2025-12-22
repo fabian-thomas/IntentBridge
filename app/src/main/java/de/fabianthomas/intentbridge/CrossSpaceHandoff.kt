@@ -9,6 +9,7 @@ import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
+import java.net.InetAddress
 
 object CrossSpaceHandoff {
     private const val TAG = "CrossSpaceHandoff"
@@ -59,8 +60,9 @@ object CrossSpaceHandoff {
         val role = ProfileRoleStore.getRole(context)
         val targetPort = ProfileRoleStore.targetPort(role)
         Log.i(TAG, "Sending $detail to port $targetPort")
+        val loopbackHost = InetAddress.getLoopbackAddress().hostAddress!!
         return runCatching {
-            TlsSocketHelper.connect(context, "127.0.0.1", targetPort, 2_000).use { socket ->
+            TlsSocketHelper.connect(context, loopbackHost, targetPort, 2_000).use { socket ->
                 BufferedWriter(OutputStreamWriter(socket.outputStream, StandardCharsets.UTF_8)).use { writer ->
                     writer.write(payload.toString())
                     writer.write("\n")

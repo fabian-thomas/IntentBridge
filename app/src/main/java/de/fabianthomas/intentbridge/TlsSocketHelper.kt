@@ -2,6 +2,7 @@ package de.fabianthomas.intentbridge
 
 import android.content.Context
 import android.util.Log
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import javax.net.ssl.SSLContext
@@ -20,7 +21,7 @@ object TlsSocketHelper {
     }
 
     fun wrapServerSocket(context: Context, socket: Socket): SSLSocket {
-        val address = socket.inetAddress?.hostAddress ?: "127.0.0.1"
+        val address = InetAddress.getLoopbackAddress().hostAddress!!
         val sslSocket = serverContext(context).socketFactory
             .createSocket(socket, address, socket.port, true) as SSLSocket
         sslSocket.useClientMode = false

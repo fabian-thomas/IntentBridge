@@ -207,7 +207,7 @@ class SocketServerService : Service() {
         val listenPort = ProfileRoleStore.listeningPort(role)
         runCatching { TlsIdentityStore.ensureIdentity(applicationContext) }
         try {
-            serverSocket = ServerSocket(listenPort, 0, InetAddress.getByName("127.0.0.1")).apply {
+            serverSocket = ServerSocket(listenPort, 0, InetAddress.getLoopbackAddress()).apply {
                 soTimeout = 1_000
             }
             Log.i(TAG, "Listening on $listenPort for ${ProfileRoleStore.describe(role)} (pid=${Process.myPid()})")
@@ -378,8 +378,9 @@ class SocketServerService : Service() {
 
         fun ping(context: Context, port: Int, timeoutMs: Int = 2_000): PingResult {
             runCatching { TlsIdentityStore.ensureIdentity(context) }
+            val loopbackHost = InetAddress.getLoopbackAddress().hostAddress!!
             return try {
-                TlsSocketHelper.connect(context, "127.0.0.1", port, timeoutMs).use { socket ->
+                TlsSocketHelper.connect(context, loopbackHost, port, timeoutMs).use { socket ->
                     val payload = JSONObject().apply { put("type", "ping") }
                     val raw = payload.toString() + "\n"
                     socket.outputStream.write(raw.toByteArray(StandardCharsets.UTF_8))
