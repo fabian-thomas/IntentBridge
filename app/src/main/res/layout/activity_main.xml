@@ -312,6 +312,15 @@
                         android:textAllCaps="false" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/linkButtonMapsGoogle"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="https://maps.google.com/?q=lumen+field"
+                        android:textAllCaps="false" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/linkButtonYouTube"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="match_parent"

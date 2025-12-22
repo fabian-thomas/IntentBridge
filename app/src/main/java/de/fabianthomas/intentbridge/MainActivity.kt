@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
 
         setupLinkButton(R.id.linkButtonMapsShort, "https://maps.app.goo.gl/Lr4bVskgxWTkQanG6")
         setupLinkButton(R.id.linkButtonMapsFull, "https://www.google.com/maps/search/?api=1&query=lumen+field")
+        setupLinkButton(R.id.linkButtonMapsGoogle, "https://maps.google.com/?q=lumen+field")
         setupLinkButton(R.id.linkButtonYouTube, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         setupLinkButton(R.id.linkButtonSpotify, "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
         setupLinkButton(R.id.linkButtonWebsite, "https://www.wikipedia.org/")

@@ -198,6 +198,7 @@ object LinkRouter {
         val host = uri.host?.lowercase(Locale.ROOT)
         if (host != null) {
             if (host == "maps.app.goo.gl") return true
+            if (host.startsWith("maps.google.")) return true
             if (host.endsWith("google.com")) {
                 val path = uri.path ?: ""
                 if (path.startsWith("/maps")) return true
