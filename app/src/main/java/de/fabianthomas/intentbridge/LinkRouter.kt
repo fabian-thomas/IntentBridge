@@ -55,13 +55,13 @@ object LinkRouter {
         uri: Uri,
         allowShortResolution: Boolean
     ) {
-        if (allowShortResolution && LinkUtils.isMapsShort(uri)) {
+        if (allowShortResolution && LinkUtils.isShortLink(uri)) {
             activity.showResolvingOverlay()
             Thread {
-                val resolved = LinkUtils.resolveMapsShortLink(uri.toString())
+                val resolved = LinkUtils.resolveShortLink(uri.toString())
                 activity.runOnUiThread {
                     val finalUri = resolved?.let { runCatching { Uri.parse(it) }.getOrNull() }
-                    if (finalUri == null || LinkUtils.isMapsShort(finalUri) || finalUri == uri) {
+                    if (finalUri == null || LinkUtils.isShortLink(finalUri) || finalUri == uri) {
                         activity.showResolveError()
                         activity.finish()
                         return@runOnUiThread

@@ -303,6 +303,15 @@
                         android:textAllCaps="false" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/linkButtonShareGoogle"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="https://share.google/QwCuhhtXmqzLhozrD"
+                        android:textAllCaps="false" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/linkButtonMapsFull"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="match_parent"

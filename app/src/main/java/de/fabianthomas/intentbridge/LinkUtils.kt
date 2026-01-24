@@ -7,15 +7,20 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object LinkUtils {
-    fun isMapsShort(uri: Uri?): Boolean {
-        return uri != null && uri.scheme == "https" && uri.host == "maps.app.goo.gl"
+    private val shortLinkHosts = setOf(
+        "maps.app.goo.gl",
+        "share.google"
+    )
+
+    fun isShortLink(uri: Uri?): Boolean {
+        val host = uri?.host?.lowercase() ?: return false
+        return uri.scheme == "https" && shortLinkHosts.contains(host)
     }
 
-    // Simple resolver for maps.app.goo.gl short links. Returns the final absolute URL or null on failure.
-    fun resolveMapsShortLink(shortUrl: String): String? {
+    // Short-link resolver. Returns the final absolute URL or null on failure.
+    fun resolveShortLink(shortUrl: String): String? {
         return try {
             val start = URL(shortUrl)
-            if (start.protocol != "https" || start.host != "maps.app.goo.gl") return null
             var current = start
             var hops = 0
             while (hops < 10) {
@@ -71,4 +76,3 @@ object LinkUtils {
         }
     }
 }
-

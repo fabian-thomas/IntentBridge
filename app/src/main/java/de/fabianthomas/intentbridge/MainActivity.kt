@@ -114,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.openByDefaultButton).setOnClickListener { openByDefaultSettings() }
 
         setupLinkButton(R.id.linkButtonMapsShort, "https://maps.app.goo.gl/Lr4bVskgxWTkQanG6")
+        setupLinkButton(R.id.linkButtonShareGoogle, "https://share.google/QwCuhhtXmqzLhozrD")
         setupLinkButton(R.id.linkButtonMapsFull, "https://www.google.com/maps/search/?api=1&query=lumen+field")
         setupLinkButton(R.id.linkButtonMapsGoogle, "https://maps.google.com/?q=lumen+field")
         setupLinkButton(R.id.linkButtonYouTube, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
