@@ -1,5 +1,7 @@
 package de.fabianthomas.intentbridge
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -17,6 +19,14 @@ class ShareBridgeActivity : ComponentActivity() {
         val incomingIntent = intent
         if (incomingIntent == null) {
             finish()
+            return
+        }
+
+        // If a share is just a URL, reuse the normal link routing flow (resolve + handoff).
+        val sharedUrl = sharedUrl(incomingIntent)
+        if (sharedUrl != null) {
+            val viewIntent = Intent(Intent.ACTION_VIEW, Uri.parse(sharedUrl))
+            LinkRouter.handle(this, viewIntent)
             return
         }
 
@@ -53,5 +63,16 @@ class ShareBridgeActivity : ComponentActivity() {
             }
         }
     }
-}
 
+    private fun sharedUrl(intent: Intent): String? {
+        val action = intent.action
+        if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return null
+        val singleStream = intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        val multipleStreams = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        if (singleStream != null || !multipleStreams.isNullOrEmpty()) return null
+        val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString() ?: return null
+        val uri = runCatching { Uri.parse(text) }.getOrNull() ?: return null
+        val scheme = uri.scheme?.lowercase() ?: return null
+        return if (scheme == "http" || scheme == "https") text else null
+    }
+}

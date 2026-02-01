@@ -15,6 +15,7 @@ See the [Screenshots](#screenshots) below for a quick glimpse.
 ## Features
 
 * Relays Google Maps, YouTube, Spotify, Mail, Phone, general web links, and share/save files between profiles.
+* URL-only shares are treated like link opens, so you can also share a link to IntentBridge directly.
 * Resolves Google short links in any profile.
 * Configurable per-link-type routing between profiles.
 * Minimal interaction — open via a single notification tap.
