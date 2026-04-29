@@ -16,7 +16,7 @@ class NotificationCopyReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_COPY_TEXT = "de.fabianthomas.intentbridge.action.NOTIFICATION_COPY_TEXT"
+        const val ACTION_COPY_TEXT = "de.fabianthomas.intentbridge.action.NOTIFICATION_COPY"
         const val EXTRA_TEXT = "de.fabianthomas.intentbridge.extra.NOTIFICATION_COPY_TEXT"
     }
 }

@@ -14,38 +14,40 @@ import java.util.Locale
 
 object LinkActionNotifications {
     private const val HANDOFF_CHANNEL_ID = "intentbridge_handoff_channel"
-    private const val HANDOFF_NOTIFICATION_ID = 2001
-    private const val HANDOFF_REQUEST_CODE = 201
-    private const val HANDOFF_SHARE_ACTION_REQUEST_CODE_BASE = 401
-    private const val HANDOFF_COPY_ACTION_REQUEST_CODE_BASE = 402
-    private const val FAILURE_NOTIFICATION_ID = 2101
-    private const val FAILURE_REQUEST_CODE = 211
-    private const val FAILURE_SHARE_REQUEST_CODE = 521
-    private const val FAILURE_COPY_REQUEST_CODE = 522
+    private const val ACTION_NOTIFICATION_OPEN = "de.fabianthomas.intentbridge.action.NOTIFICATION_OPEN"
+    private const val ACTION_NOTIFICATION_SHARE = "de.fabianthomas.intentbridge.action.NOTIFICATION_SHARE"
+    private const val ACTION_NOTIFICATION_COPY = "de.fabianthomas.intentbridge.action.NOTIFICATION_COPY"
+    private const val REQUEST_CODE = 0
 
     fun showIncomingLink(context: Context, uri: Uri) {
         val appCtx = context.applicationContext
         val sourceRole = ProfileRoleStore.opposite(ProfileRoleStore.getRole(appCtx))
         val sourceName = ProfileRoleStore.describe(sourceRole)
         ensureHandoffChannel(appCtx, sourceName)
+        val rawUrl = uri.toString()
+        val key = notificationKey(rawUrl)
+        val notificationId = key.stableId()
         val actionText = shareableActionText(uri)
+        val keyHash = key.stableId().toString()
 
         val openPendingIntent = PendingIntent.getActivity(
             appCtx,
-            HANDOFF_REQUEST_CODE,
-            LinkForwardActivity.createIntent(appCtx, uri.toString()),
+            REQUEST_CODE,
+            LinkForwardActivity.createIntent(appCtx, uri.toString()).apply {
+                action = ACTION_NOTIFICATION_OPEN
+                data = Uri.parse("intentbridge://notification/$keyHash/open")
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val hashOffset = actionText.hashCode() and 0x0FFFFFFF
         val sharePendingIntent = sharePendingIntent(
             appCtx,
-            HANDOFF_SHARE_ACTION_REQUEST_CODE_BASE + hashOffset,
+            keyHash,
             actionText,
             appCtx.getString(R.string.notification_handoff_title, sourceName)
         )
         val copyPendingIntent = copyPendingIntent(
             appCtx,
-            HANDOFF_COPY_ACTION_REQUEST_CODE_BASE + hashOffset,
+            keyHash,
             actionText
         )
 
@@ -57,7 +59,7 @@ object LinkActionNotifications {
             .addAction(copyAction(appCtx, copyPendingIntent))
             .build()
 
-        NotificationManagerCompat.from(appCtx).notify(HANDOFF_NOTIFICATION_ID, notification)
+        NotificationManagerCompat.from(appCtx).notify(notificationId, notification)
     }
 
     fun showFailedLink(context: Context, failedUrl: String) {
@@ -66,12 +68,16 @@ object LinkActionNotifications {
         val targetRole = ProfileRoleStore.opposite(ProfileRoleStore.getRole(appCtx))
         val targetName = ProfileRoleStore.describe(targetRole)
         ensureHandoffChannel(appCtx, targetName)
+        val rawUrl = uri.toString()
+        val key = notificationKey(rawUrl)
+        val notificationId = key.stableId()
+        val keyHash = key.stableId().toString()
 
         val openPendingIntent = PendingIntent.getActivity(
             appCtx,
-            FAILURE_REQUEST_CODE,
+            REQUEST_CODE,
             Intent(appCtx, LinkRouterActivity::class.java).apply {
-                action = Intent.ACTION_VIEW
+                action = ACTION_NOTIFICATION_OPEN
                 data = uri
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             },
@@ -79,11 +85,15 @@ object LinkActionNotifications {
         )
         val sharePendingIntent = sharePendingIntent(
             appCtx,
-            FAILURE_SHARE_REQUEST_CODE,
+            keyHash,
             failedUrl,
             appCtx.getString(R.string.notification_handoff_failed_title, targetName)
         )
-        val copyPendingIntent = copyPendingIntent(appCtx, FAILURE_COPY_REQUEST_CODE, failedUrl)
+        val copyPendingIntent = copyPendingIntent(
+            appCtx,
+            keyHash,
+            failedUrl
+        )
 
         val notification = baseBuilder(appCtx, appCtx.getString(R.string.notification_handoff_failed_title, targetName), failedUrl)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -93,8 +103,12 @@ object LinkActionNotifications {
             .addAction(copyAction(appCtx, copyPendingIntent))
             .build()
 
-        NotificationManagerCompat.from(appCtx).notify(FAILURE_NOTIFICATION_ID, notification)
+        NotificationManagerCompat.from(appCtx).notify(notificationId, notification)
     }
+
+    private fun notificationKey(rawUrl: String): String = "link|$rawUrl"
+
+    private fun String.stableId(): Int = hashCode() and 0x7fffffff
 
     private fun ensureHandoffChannel(context: Context, sourceName: String) {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
@@ -120,7 +134,7 @@ object LinkActionNotifications {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
     }
 
-    private fun sharePendingIntent(context: Context, requestCode: Int, text: String, subject: String): PendingIntent {
+    private fun sharePendingIntent(context: Context, keyHash: String, text: String, subject: String): PendingIntent {
         val chooser = Intent.createChooser(
             Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
@@ -129,22 +143,25 @@ object LinkActionNotifications {
             },
             context.getString(R.string.share_chooser)
         ).apply {
+            action = ACTION_NOTIFICATION_SHARE
+            data = Uri.parse("intentbridge://notification/$keyHash/share")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         return PendingIntent.getActivity(
             context,
-            requestCode,
+            REQUEST_CODE,
             chooser,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
-    private fun copyPendingIntent(context: Context, requestCode: Int, text: String): PendingIntent {
+    private fun copyPendingIntent(context: Context, keyHash: String, text: String): PendingIntent {
         return PendingIntent.getBroadcast(
             context,
-            requestCode,
+            REQUEST_CODE,
             Intent(context, NotificationCopyReceiver::class.java).apply {
-                action = NotificationCopyReceiver.ACTION_COPY_TEXT
+                action = ACTION_NOTIFICATION_COPY
+                data = Uri.parse("intentbridge://notification/$keyHash/copy")
                 putExtra(NotificationCopyReceiver.EXTRA_TEXT, text)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
