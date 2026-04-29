@@ -194,6 +194,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".NotificationCopyReceiver"
+            android:exported="false" />
+
         <service
             android:name=".SocketServerService"
             android:exported="false"

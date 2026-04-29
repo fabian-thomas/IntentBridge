@@ -14,7 +14,12 @@ import java.net.InetAddress
 object CrossSpaceHandoff {
     private const val TAG = "CrossSpaceHandoff"
 
-    fun launch(context: Context, url: String) {
+    fun launch(
+        context: Context,
+        url: String,
+        onDelivered: (() -> Unit)? = null,
+        onFailed: (() -> Unit)? = null
+    ) {
         runCatching { TlsIdentityStore.ensureIdentity(context) }
         Thread {
             val payload = JSONObject().apply {
@@ -23,13 +28,17 @@ object CrossSpaceHandoff {
                 put("routing", LinkRoutingPrefs.snapshot(context))
             }
             val delivered = sendPayload(context, payload, "handoff:$url")
-            if (!delivered) {
-                Handler(Looper.getMainLooper()).post {
+            Handler(Looper.getMainLooper()).post {
+                if (delivered) {
+                    onDelivered?.invoke()
+                } else {
                     Toast.makeText(
                         context.applicationContext,
                         R.string.handoff_failed,
                         Toast.LENGTH_LONG
                     ).show()
+                    LinkActionNotifications.showFailedLink(context, url)
+                    onFailed?.invoke()
                 }
             }
         }.start()

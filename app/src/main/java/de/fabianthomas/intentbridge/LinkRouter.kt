@@ -161,8 +161,11 @@ object LinkRouter {
                 activity.showOpenError(uri)
             }
         } else {
-            CrossSpaceHandoff.launch(activity, uri.toString())
-            CrossSpaceMessages.showForwardToast(activity, targetRole)
+            CrossSpaceHandoff.launch(
+                activity,
+                uri.toString(),
+                onDelivered = { CrossSpaceMessages.showForwardToast(activity, targetRole) }
+            )
         }
         activity.finish()
     }

@@ -54,6 +54,7 @@
     <string name="notification_handoff_channel_name">Link distributor</string>
     <string name="notification_handoff_channel_description">Launches incoming links to %1$s.</string>
     <string name="notification_handoff_title">Link from %1$s</string>
+    <string name="notification_handoff_failed_title">Couldn’t forward link to %1$s</string>
     <string name="secure_channel_section">TLS identities</string>
     <string name="tls_section">TLS settings</string>
     <string name="tls_local_label_default">This space\'s fingerprint:</string>

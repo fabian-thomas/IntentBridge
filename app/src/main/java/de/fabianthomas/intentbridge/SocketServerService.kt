@@ -5,23 +5,16 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.Uri
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.IBinder
 import android.os.Process
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.IconCompat
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -31,7 +24,6 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.net.ssl.SSLException
 
@@ -82,13 +74,6 @@ class SocketServerService : Service() {
         when (intent?.action) {
             ACTION_STOP -> {
                 stopSelf()
-                return START_NOT_STICKY
-            }
-            ACTION_COPY_TEXT -> {
-                val text = intent.getStringExtra(EXTRA_NOTIFICATION_TEXT)
-                if (!text.isNullOrBlank()) {
-                    copyTextToClipboard(text)
-                }
                 return START_NOT_STICKY
             }
         }
@@ -162,75 +147,6 @@ class SocketServerService : Service() {
             .addAction(R.mipmap.ic_launcher, getString(R.string.notification_action_stop), stopPendingIntent)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
             .build()
-    }
-
-    private fun showHandoffNotification(uri: Uri) {
-        val sourceRole = ProfileRoleStore.opposite(ProfileRoleStore.getRole(applicationContext))
-        val sourceName = ProfileRoleStore.describe(sourceRole)
-        val urlText = uri.toString()
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            HANDOFF_REQUEST_CODE,
-            LinkForwardActivity.createIntent(this, uri.toString()),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val hashOffset = urlText.hashCode() and 0x0FFFFFFF
-        val actionText = shareableActionText(uri)
-        val shareChooser = Intent.createChooser(
-            Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, actionText)
-                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.notification_handoff_title, sourceName))
-            },
-            getString(R.string.share_chooser)
-        ).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        val shareActionIntent = PendingIntent.getActivity(
-            this,
-            HANDOFF_SHARE_ACTION_REQUEST_CODE_BASE + hashOffset,
-            shareChooser,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val copyActionIntent = PendingIntent.getService(
-            this,
-            HANDOFF_COPY_ACTION_REQUEST_CODE_BASE + hashOffset,
-            Intent(this, SocketServerService::class.java).apply {
-                action = ACTION_COPY_TEXT
-                putExtra(EXTRA_NOTIFICATION_TEXT, actionText)
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(this, HANDOFF_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(getString(R.string.notification_handoff_title, sourceName))
-            .setContentText(actionText)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setAutoCancel(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(pendingIntent)
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    IconCompat.createWithResource(this, R.drawable.ic_notification_share),
-                    getString(R.string.notification_action_share),
-                    shareActionIntent
-                ).setContextual(true)
-                    .build()
-            )
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    IconCompat.createWithResource(this, R.drawable.ic_notification_copy),
-                    getString(R.string.notification_action_copy),
-                    copyActionIntent
-                ).setContextual(true)
-                    .build()
-            )
-            .build()
-
-        NotificationManagerCompat.from(this).notify(HANDOFF_NOTIFICATION_ID, notification)
     }
 
     private fun showShareNotification(shareId: String, summary: String?) {
@@ -352,7 +268,7 @@ class SocketServerService : Service() {
     private fun handleHandoff(url: String) {
         Log.i(TAG, "Received handoff URL: $url")
         val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return
-        showHandoffNotification(uri)
+        LinkActionNotifications.showIncomingLink(applicationContext, uri)
     }
 
     private fun handleSharePayload(payload: JSONObject) {
@@ -373,27 +289,6 @@ class SocketServerService : Service() {
         }
         stored.items.firstOrNull()?.displayName?.takeIf { !it.isNullOrBlank() }?.let { return it }
         return null
-    }
-
-    private fun copyTextToClipboard(value: String) {
-        val clipboard = ContextCompat.getSystemService(this, ClipboardManager::class.java)
-        if (clipboard == null) {
-            Log.w(TAG, "Clipboard service unavailable, cannot copy")
-            return
-        }
-        clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.clipboard_label_link), value))
-    }
-
-    private fun shareableActionText(uri: Uri): String {
-        val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: return uri.toString()
-        return when (scheme) {
-            "tel" -> uri.schemeSpecificPart?.let { Uri.decode(it) }?.takeIf { it.isNotBlank() } ?: uri.toString()
-            "mailto" -> {
-                val address = uri.schemeSpecificPart?.substringBefore('?')
-                address?.let { Uri.decode(it) }?.takeIf { it.isNotBlank() } ?: uri.toString()
-            }
-            else -> uri.toString()
-        }
     }
 
     private fun sendSecureMessage(channelId: Int, socket: Socket, payload: JSONObject) {
@@ -433,17 +328,11 @@ class SocketServerService : Service() {
         private const val TAG = "IntentBridgeSocketServer"
         private const val NOTIFICATION_ID = 1001
         private const val NOTIFICATION_CHANNEL_ID = "intentbridge_socket_listener"
-        private const val HANDOFF_NOTIFICATION_ID = 2001
         private const val HANDOFF_CHANNEL_ID = "intentbridge_handoff_channel"
-        private const val HANDOFF_REQUEST_CODE = 201
-        private const val HANDOFF_SHARE_ACTION_REQUEST_CODE_BASE = 401
-        private const val HANDOFF_COPY_ACTION_REQUEST_CODE_BASE = 402
         private const val SHARE_NOTIFICATION_ID_BASE = 3000
         private const val SHARE_REQUEST_CODE_BASE = 301
         private const val MAX_NOTIFICATION_TEXT = 200
-        private const val EXTRA_NOTIFICATION_TEXT = "de.fabianthomas.intentbridge.extra.NOTIFICATION_TEXT"
         private const val ACTION_STOP = "de.fabianthomas.intentbridge.action.STOP_SOCKET_SERVER"
-        private const val ACTION_COPY_TEXT = "de.fabianthomas.intentbridge.action.COPY_TEXT"
         private val serviceRunning = AtomicBoolean(false)
 
         fun ensureRunning(context: Context) {
