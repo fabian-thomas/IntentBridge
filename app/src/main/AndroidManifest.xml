@@ -28,7 +28,9 @@
             android:name=".BrowserActivity"
             android:exported="true"
             android:label="IntentBridge Browser"
-            android:theme="@style/Theme.IntentBridge.TranslucentOverlay">
+            android:theme="@style/Theme.IntentBridge.TranslucentOverlay"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -78,7 +80,9 @@
         <activity
             android:name=".LinkRouterActivity"
             android:exported="true"
-            android:theme="@style/Theme.IntentBridge.TranslucentOverlay">
+            android:theme="@style/Theme.IntentBridge.TranslucentOverlay"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
             <!-- Intercept common Google Maps deep links -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
